@@ -17,7 +17,7 @@ func TestFormatEvent_PushEvent(t *testing.T) {
 		Payload: Payload{Size: 3},
 	}
 
-	expected := "- Pushed 3 commits to test/repo"
+	expected := "- Pushed 3 commits to \x1b]8;;https://github.com/test/repo\x1b\\test/repo\x1b]8;;\x1b\\"
 	result := formatEvent(event)
 
 	if result != expected {
@@ -30,9 +30,9 @@ func TestFormatEvent_IssuesEvent(t *testing.T) {
 		action   string
 		expected string
 	}{
-		{"opened", "- Opened a new issue in test/repo"},
-		{"closed", "- Closed an issue in test/repo"},
-		{"labeled", "- Labeled an issue in test/repo"},
+		{"opened", "- Opened a new issue in \x1b]8;;https://github.com/test/repo\x1b\\test/repo\x1b]8;;\x1b\\"},
+		{"closed", "- Closed an issue in \x1b]8;;https://github.com/test/repo\x1b\\test/repo\x1b]8;;\x1b\\"},
+		{"labeled", "- Labeled an issue in \x1b]8;;https://github.com/test/repo\x1b\\test/repo\x1b]8;;\x1b\\"},
 	}
 
 	for _, tt := range tests {
@@ -57,7 +57,7 @@ func TestFormatEvent_WatchEvent(t *testing.T) {
 		Repo: Repo{Name: "test/repo"},
 	}
 
-	expected := "- Starred test/repo"
+	expected := "- Starred \x1b]8;;https://github.com/test/repo\x1b\\test/repo\x1b]8;;\x1b\\"
 	result := formatEvent(event)
 
 	if result != expected {
@@ -71,9 +71,9 @@ func TestFormatEvent_CreateEvent(t *testing.T) {
 		ref      string
 		expected string
 	}{
-		{"repository", "", "- Created repository test/repo"},
-		{"branch", "feature-branch", "- Created branch feature-branch in test/repo"},
-		{"tag", "v1.0.0", "- Created tag in test/repo"},
+		{"repository", "", "- Created repository \x1b]8;;https://github.com/test/repo\x1b\\test/repo\x1b]8;;\x1b\\"},
+		{"branch", "feature-branch", "- Created branch feature-branch in \x1b]8;;https://github.com/test/repo\x1b\\test/repo\x1b]8;;\x1b\\"},
+		{"tag", "v1.0.0", "- Created tag in \x1b]8;;https://github.com/test/repo\x1b\\test/repo\x1b]8;;\x1b\\"},
 	}
 
 	for _, tt := range tests {
@@ -105,7 +105,7 @@ func TestFormatEvent_DeleteEvent(t *testing.T) {
 		},
 	}
 
-	expected := "- Deleted branch old-branch in test/repo"
+	expected := "- Deleted branch old-branch in \x1b]8;;https://github.com/test/repo\x1b\\test/repo\x1b]8;;\x1b\\"
 	result := formatEvent(event)
 
 	if result != expected {
@@ -119,7 +119,7 @@ func TestFormatEvent_ForkEvent(t *testing.T) {
 		Repo: Repo{Name: "test/repo"},
 	}
 
-	expected := "- Forked test/repo"
+	expected := "- Forked \x1b]8;;https://github.com/test/repo\x1b\\test/repo\x1b]8;;\x1b\\"
 	result := formatEvent(event)
 
 	if result != expected {
@@ -132,9 +132,9 @@ func TestFormatEvent_PullRequestEvent(t *testing.T) {
 		action   string
 		expected string
 	}{
-		{"opened", "- Opened a new pull request in test/repo"},
-		{"closed", "- Closed a pull request in test/repo"},
-		{"merged", "- Merged a pull request in test/repo"},
+		{"opened", "- Opened a new pull request in \x1b]8;;https://github.com/test/repo\x1b\\test/repo\x1b]8;;\x1b\\"},
+		{"closed", "- Closed a pull request in \x1b]8;;https://github.com/test/repo\x1b\\test/repo\x1b]8;;\x1b\\"},
+		{"merged", "- Merged a pull request in \x1b]8;;https://github.com/test/repo\x1b\\test/repo\x1b]8;;\x1b\\"},
 	}
 
 	for _, tt := range tests {
@@ -159,7 +159,7 @@ func TestFormatEvent_PublicEvent(t *testing.T) {
 		Repo: Repo{Name: "test/repo"},
 	}
 
-	expected := "- Made test/repo public"
+	expected := "- Made \x1b]8;;https://github.com/test/repo\x1b\\test/repo\x1b]8;;\x1b\\ public"
 	result := formatEvent(event)
 
 	if result != expected {
@@ -174,7 +174,7 @@ func TestFormatEvent_MemberEvent(t *testing.T) {
 		Payload: Payload{Action: "added"},
 	}
 
-	expected := "- Added a collaborator to test/repo"
+	expected := "- Added a collaborator to \x1b]8;;https://github.com/test/repo\x1b\\test/repo\x1b]8;;\x1b\\"
 	result := formatEvent(event)
 
 	if result != expected {
@@ -188,7 +188,7 @@ func TestFormatEvent_UnknownEvent(t *testing.T) {
 		Repo: Repo{Name: "test/repo"},
 	}
 
-	expected := "- UnknownEvent in test/repo"
+	expected := "- UnknownEvent in \x1b]8;;https://github.com/test/repo\x1b\\test/repo\x1b]8;;\x1b\\"
 	result := formatEvent(event)
 
 	if result != expected {
