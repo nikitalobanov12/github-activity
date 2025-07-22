@@ -25,6 +25,11 @@ type Payload struct {
 	Action  string `json:"action"`
 }
 
+// createHyperlink creates a clickable hyperlink using ANSI escape codes
+func createHyperlink(url, text string) string {
+	return fmt.Sprintf("\033]8;;%s\033\\%s\033]8;;\033\\", url, text)
+}
+
 // fetchGitHubActivity retrieves the recent public GitHub events for the specified user.
 // It returns a slice of Event structs representing the user's activity, or an error if the request fails.
 func fetchGitHubActivity(username string) ([]Event, error) {
@@ -55,63 +60,65 @@ func fetchGitHubActivity(username string) ([]Event, error) {
 // It formats the event based on its type and relevant payload details.
 func formatEvent(event Event) string {
 	repoName := event.Repo.Name
+	repoURL := fmt.Sprintf("https://github.com/%s", repoName)
+	linkedRepoName := createHyperlink(repoURL, repoName)
 
 	switch event.Type {
 	case "PushEvent":
 		commitCount := event.Payload.Size
-		return fmt.Sprintf("- Pushed %d commits to %s", commitCount, repoName)
+		return fmt.Sprintf("- Pushed %d commits to %s", commitCount, linkedRepoName)
 
 	case "IssuesEvent":
 		action := event.Payload.Action
 		switch action {
 		case "opened":
-			return fmt.Sprintf("- Opened a new issue in %s", repoName)
+			return fmt.Sprintf("- Opened a new issue in %s", linkedRepoName)
 		case "closed":
-			return fmt.Sprintf("- Closed an issue in %s", repoName)
+			return fmt.Sprintf("- Closed an issue in %s", linkedRepoName)
 		}
-		return fmt.Sprintf("- %s an issue in %s", strings.Title(action), repoName)
+		return fmt.Sprintf("- %s an issue in %s", strings.Title(action), linkedRepoName)
 
 	case "WatchEvent":
-		return fmt.Sprintf("- Starred %s", repoName)
+		return fmt.Sprintf("- Starred %s", linkedRepoName)
 
 	case "CreateEvent":
 		refType := event.Payload.RefType
 		switch refType {
 		case "repository":
-			return fmt.Sprintf("- Created repository %s", repoName)
+			return fmt.Sprintf("- Created repository %s", linkedRepoName)
 		case "branch":
 			ref := event.Payload.Ref
-			return fmt.Sprintf("- Created branch %s in %s", ref, repoName)
+			return fmt.Sprintf("- Created branch %s in %s", ref, linkedRepoName)
 		}
-		return fmt.Sprintf("- Created %s in %s", refType, repoName)
+		return fmt.Sprintf("- Created %s in %s", refType, linkedRepoName)
 
 	case "DeleteEvent":
 		refType := event.Payload.RefType
 		ref := event.Payload.Ref
-		return fmt.Sprintf("- Deleted %s %s in %s", refType, ref, repoName)
+		return fmt.Sprintf("- Deleted %s %s in %s", refType, ref, linkedRepoName)
 
 	case "ForkEvent":
-		return fmt.Sprintf("- Forked %s", repoName)
+		return fmt.Sprintf("- Forked %s", linkedRepoName)
 
 	case "PullRequestEvent":
 		action := event.Payload.Action
 		switch action {
 		case "opened":
-			return fmt.Sprintf("- Opened a new pull request in %s", repoName)
+			return fmt.Sprintf("- Opened a new pull request in %s", linkedRepoName)
 		case "closed":
-			return fmt.Sprintf("- Closed a pull request in %s", repoName)
+			return fmt.Sprintf("- Closed a pull request in %s", linkedRepoName)
 		}
-		return fmt.Sprintf("- %s a pull request in %s", strings.Title(action), repoName)
+		return fmt.Sprintf("- %s a pull request in %s", strings.Title(action), linkedRepoName)
 
 	case "PublicEvent":
-		return fmt.Sprintf("- Made %s public", repoName)
+		return fmt.Sprintf("- Made %s public", linkedRepoName)
 
 	case "MemberEvent":
 		action := event.Payload.Action
-		return fmt.Sprintf("- %s a collaborator to %s", strings.Title(action), repoName)
+		return fmt.Sprintf("- %s a collaborator to %s", strings.Title(action), linkedRepoName)
 
 	default:
-		return fmt.Sprintf("- %s in %s", event.Type, repoName)
+		return fmt.Sprintf("- %s in %s", event.Type, linkedRepoName)
 	}
 }
 
@@ -172,7 +179,9 @@ func main() {
 		os.Exit(0)
 	}
 
-	fmt.Printf("Fetching activity for user: %s\n", username)
+	userURL := fmt.Sprintf("https://github.com/%s", username)
+	linkedUsername := createHyperlink(userURL, username)
+	fmt.Printf("Fetching activity for user: %s\n", linkedUsername)
 
 	events, err := fetchGitHubActivity(username)
 	if err != nil {
@@ -187,7 +196,7 @@ func main() {
 
 	groupedEvents := groupEvents(events)
 
-	fmt.Printf("\nRecent activity for %s:\n", username)
+	fmt.Printf("\nRecent activity for %s:\n", linkedUsername)
 	for i, event := range groupedEvents {
 		if i >= 10 {
 			break
